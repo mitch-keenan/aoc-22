@@ -6,6 +6,11 @@ interface Args {
 	test: boolean;
 }
 
+const abort = (...args: any[]) => {
+	console.error(...args);
+	Deno.exit(1);
+};
+
 function getArgs(): Args {
 	const flags = parse(Deno.args, {
 		string: ["puzzle", "day", "test"],
@@ -14,15 +19,13 @@ function getArgs(): Args {
 
 	const dayArg = flags.day;
 	if (!dayArg) {
-		console.error("Day number required, use `-d #` or `-day #`");
-		Deno.exit(1);
+		abort("Day number required, use `-d #` or `-day #`");
 	}
 	const day = parseInt(dayArg, 10);
 
 	const puzzleArg = flags.puzzle;
 	if (!puzzleArg) {
-		console.error("Puzzle number required, use `-p #` or `-puzzle #`");
-		Deno.exit(1);
+		abort("Puzzle number required, use `-p #` or `-puzzle #`");
 	}
 	const puzzle = parseInt(puzzleArg, 10);
 
@@ -43,12 +46,25 @@ const folderName = getFolder(args);
 const input = await Deno.readTextFile(
 	`./${folderName}/input${args.test ? ".test" : ""}.txt`
 );
-const { solve } = await import(import.meta.resolve(`./${folderName}/mod.ts`));
-if (typeof solve === "function") {
+const modFilePath = import.meta.resolve(`./${folderName}/mod.ts`);
+const { solve } = await import(modFilePath);
+if (typeof solve !== "function") {
+	abort(`"solve" imported from ${modFilePath} is not a function`);
+}
+
+if (!args.test) {
 	const result = await solve(input);
+	console.log(`Solution to Day ${args.day} - Puzzle ${args.puzzle}: ` + result);
+	Deno.exit(0);
+}
+
+// Test mode, split on `---`
+const inputs = input.split("\n---\n");
+let testNum = 1;
+for (const testInput of inputs) {
+	const result = await solve(testInput);
 	console.log(
-		`Solution to Day ${args.day} - Puzzle ${args.puzzle}${
-			args.test ? " - TEST" : ""
-		}: ` + result
+		`D${args.day} P${args.puzzle} Test ${testNum}: ` + result + "\n\n"
 	);
+	testNum++;
 }
