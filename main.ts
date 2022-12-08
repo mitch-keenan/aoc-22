@@ -6,7 +6,7 @@ interface Args {
 	test: boolean;
 }
 
-const abort = (...args: any[]) => {
+const abort = (...args: unknown[]) => {
 	console.error(...args);
 	Deno.exit(1);
 };

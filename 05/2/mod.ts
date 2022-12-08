@@ -63,7 +63,7 @@ const parseInstructions = (instructionsInput: string): Instruction[] => {
 };
 
 /** Non-essential method for re-printing the stacks in the format from the puzzle */
-const printStacks = (stackMap: Stacks) => {
+const _printStacks = (stackMap: Stacks) => {
 	const heightMap = new Map<number, Map<number, string>>(); // height => stackNumber => value
 	const stacksItr = stackMap.entries();
 	let maxHeight = 0;
@@ -105,7 +105,7 @@ export function solve(input: string) {
 	instructions.forEach((instruction) => moveCrates(instruction, stackMap));
 
 	// To print out stacks after movements in original format
-	printStacks(stackMap);
+	// _printStacks(stackMap);
 
 	let result = "";
 	for (let i = 0; i < stackMap.size; i++) {
